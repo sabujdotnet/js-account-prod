@@ -4,7 +4,7 @@
 
 services:
   # Backend API Service
-  - type: web
+  - type: web service
     name: js-accounting-api
     runtime: node
     buildCommand: cd server && npm install
