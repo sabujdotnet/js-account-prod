@@ -5,7 +5,7 @@
 services:
   # Backend API Service
   - type: web service
-    name: js-accounting-api
+    name: js-account-prod
     runtime: node
     buildCommand: cd server && npm install
     startCommand: cd server && npm start
@@ -21,13 +21,13 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: CLIENT_URL
-        value: https://js-accounting.onrender.com
+        value: https://js-account-sys.onrender.com
       - key: GOOGLE_CLIENT_ID
         sync: false  # Set this in Render dashboard
       - key: GOOGLE_CLIENT_SECRET
         sync: false  # Set this in Render dashboard
       - key: GOOGLE_REDIRECT_URI
-        value: https://js-accounting-api.onrender.com/api/backup/google/callback
+        value: https://js-account-sys.onrender.com/api/backup/google/callback
       - key: LOG_LEVEL
         value: info
     healthCheckPath: /health
