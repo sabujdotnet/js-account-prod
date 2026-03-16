@@ -41,7 +41,7 @@ services:
     staticPublishPath: ./client/build
     envVars:
       - key: REACT_APP_API_URL
-        value: https://js-accounting-api.onrender.com
+        value: https://js-account-prod.onrender.com
     routes:
       - type: rewrite
         source: /*
