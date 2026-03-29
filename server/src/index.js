@@ -1,9 +1,8 @@
 /**
- * J&S Accounting BD - Production Server
- * Author: sabujdotnet
- * Website: https://sabujdotnet.github.io
- */
-
+J&S Accounting BD - Production Server
+Author: sabujdotnet
+Website: https://sabujdotnet.github.io
+*/
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -15,16 +14,6 @@ require('dotenv').config();
 const { connectDB } = require('./config/database');
 const { setupCronJobs } = require('./services/backgroundSync');
 const logger = require('./utils/logger');
-
-const express = require('express');
-const app = express();
-
-// 🔥 ADD THIS LINE (critical for Render/Heroku/proxy environments)
-app.set('trust proxy', 1); // or 'loopback', or true
-
-// ... then your other middleware
-app.use(express.json());
-app.use(require('express-rate-limit')({ ... }));
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -38,8 +27,11 @@ const workerRoutes = require('./routes/workers');
 const invoiceRoutes = require('./routes/invoices');
 const budgetRoutes = require('./routes/budgets');
 
-const app = express();
+const app = express(); // ✅ Only ONE app declaration
 const PORT = process.env.PORT || 3001;
+
+// 🔥 Trust proxy for Render/Heroku (BEFORE rate limiting)
+app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet({
@@ -55,19 +47,28 @@ app.use(helmet({
 
 app.use(compression());
 
-// Rate limiting
-const limiter = rateLimit({
+// ✅ Rate limiting - PROPERLY CONFIGUREDconst apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
+  message: { 
+    success: false, 
+    message: 'Too many requests from this IP, please try again later.' 
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
-app.use('/api/', limiter);
+app.use('/api/', apiLimiter);
 
 // Stricter rate limit for auth endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
-  message: 'Too many authentication attempts, please try again later.',
+  message: { 
+    success: false, 
+    message: 'Too many authentication attempts, please try again later.' 
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use('/api/auth/login', authLimiter);
 
@@ -77,7 +78,7 @@ app.use(cors({
   credentials: true,
 }));
 
-// Body parsing
+// ✅ Body parsing - Only ONCE with limits
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -94,9 +95,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+// ✅ API routes (attached to the SINGLE app instance)
+app.use('/api/auth', authRoutes);app.use('/api/users', userRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/photos', photoRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -109,7 +109,6 @@ app.use('/api/budgets', budgetRoutes);
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../../client/build')));
-  
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../../client/build/index.html'));
   });
@@ -118,7 +117,6 @@ if (process.env.NODE_ENV === 'production') {
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error('Unhandled error:', err);
-  
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal server error',
@@ -137,22 +135,17 @@ app.use((req, res) => {
 // Start server
 async function startServer() {
   try {
-    // Connect to database
     await connectDB();
     logger.info('Database connected successfully');
-    
-    // Setup background sync cron jobs
     setupCronJobs();
     logger.info('Background sync cron jobs initialized');
-    
-    // Start listening
+
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (error) {
-    logger.error('Failed to start server:', error);
-    process.exit(1);
+    logger.error('Failed to start server:', error);    process.exit(1);
   }
 }
 
@@ -169,5 +162,4 @@ process.on('uncaughtException', (err) => {
 });
 
 startServer();
-
 module.exports = app;
