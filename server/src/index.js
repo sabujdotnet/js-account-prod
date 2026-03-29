@@ -27,10 +27,10 @@ const workerRoutes = require('./routes/workers');
 const invoiceRoutes = require('./routes/invoices');
 const budgetRoutes = require('./routes/budgets');
 
-const app = express(); // ✅ Only ONE app declaration
+const app = express();
 const PORT = process.env.PORT || 3001;
 
-// 🔥 Trust proxy for Render/Heroku (BEFORE rate limiting)
+// 🔥 Trust proxy for Render/Heroku (MUST be before rate limiting)
 app.set('trust proxy', 1);
 
 // Security middleware
@@ -78,7 +78,7 @@ app.use(cors({
   credentials: true,
 }));
 
-// ✅ Body parsing - Only ONCE with limits
+// Body parsing - ONCE with limits
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -95,7 +95,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ✅ API routes (attached to the SINGLE app instance)
+// API routes
 app.use('/api/auth', authRoutes);app.use('/api/users', userRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/photos', photoRoutes);
