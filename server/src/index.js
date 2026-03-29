@@ -47,7 +47,8 @@ app.use(helmet({
 
 app.use(compression());
 
-// ✅ Rate limiting - PROPERLY CONFIGUREDconst apiLimiter = rateLimit({
+// ✅ Rate limiting - PROPERLY CONFIGURED
+const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: { 
@@ -96,7 +97,8 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
-app.use('/api/auth', authRoutes);app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/photos', photoRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -145,7 +147,8 @@ async function startServer() {
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (error) {
-    logger.error('Failed to start server:', error);    process.exit(1);
+    logger.error('Failed to start server:', error);
+    process.exit(1);
   }
 }
 
