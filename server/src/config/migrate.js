@@ -2,7 +2,8 @@
  * Database Migration Script
  * Creates all necessary tables
  */
-
+// ADD THIS AT THE VERY TOP (Line 1)
+require('dotenv').config(); 
 const { pool } = require('./database');
 const logger = require('../utils/logger');
 

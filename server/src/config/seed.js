@@ -2,7 +2,8 @@
  * Database Seed Script
  * Creates initial admin user and sample data
  */
-
+// ADD THIS AT THE VERY TOP (Line 1)
+require('dotenv').config(); 
 const bcrypt = require('bcryptjs');
 const { pool } = require('./database');
 const logger = require('../utils/logger');
