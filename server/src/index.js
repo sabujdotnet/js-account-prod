@@ -16,6 +16,16 @@ const { connectDB } = require('./config/database');
 const { setupCronJobs } = require('./services/backgroundSync');
 const logger = require('./utils/logger');
 
+const express = require('express');
+const app = express();
+
+// 🔥 ADD THIS LINE (critical for Render/Heroku/proxy environments)
+app.set('trust proxy', 1); // or 'loopback', or true
+
+// ... then your other middleware
+app.use(express.json());
+app.use(require('express-rate-limit')({ ... }));
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
