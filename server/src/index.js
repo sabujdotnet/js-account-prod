@@ -108,6 +108,14 @@ app.use('/api/workers', workerRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/budgets', budgetRoutes);
 
+// Catch-all 404 handler strictly for missing API routes
+app.use('/api/*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'API route not found',
+  });
+});
+
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../../client/build')));
@@ -123,14 +131,6 @@ app.use((err, req, res, next) => {
     success: false,
     message: err.message || 'Internal server error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-  });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found',
   });
 });
 
